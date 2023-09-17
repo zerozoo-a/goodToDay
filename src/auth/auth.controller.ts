@@ -13,21 +13,25 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/login')
-  async kakaoLogin(@Body('body') req: any, @Response() res): Promise<any> {
+  async kakaoLogin(
+    @Body('body') req: { body: string },
+    @Response() res,
+  ): Promise<any> {
     try {
       // 카카오 토큰 조회 후 계정 정보 가져오기
       const { code, domain } = JSON.parse(req.body);
       if (!code || !domain) {
-        throw new BadRequestException('카카오 정보가 없습니다.');
+        if (!code) throw new BadRequestException(`code is missing`);
+        if (!domain) throw new BadRequestException(`domain is missing`);
+        throw new BadRequestException(`code, domain is missing`);
       }
 
       const kakao = await this.authService.kakaoLogin({ code, domain });
-      if (!kakao.id) {
-        throw new BadRequestException('카카오 정보가 없습니다.');
-      }
+
+      const jwt = await this.authService.kakaoToOwnServiceLogin(kakao);
 
       res.send({
-        user: kakao,
+        accessToken: jwt.accessToken,
         message: 'success',
       });
     } catch (e) {

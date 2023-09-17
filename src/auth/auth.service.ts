@@ -1,9 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import axios from 'axios';
 import * as qs from 'qs';
+import { Payload } from './security/jwt_payload.interface';
+import { UsersService } from 'src/users/users.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
   async kakaoLogin(options: { code: string; domain: string }): Promise<any> {
     const { code, domain } = options;
     const kakaoRestApiKey = '8fc6587f15b62fcab9ddacd8950612df';
@@ -20,7 +27,6 @@ export class AuthService {
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
     };
-    console.log('qs', qs);
     const data = qs.stringify(body);
     try {
       const response = await axios({
@@ -32,25 +38,18 @@ export class AuthService {
       });
 
       if (response.status === 200) {
-        console.log(`kakaoToken : ${JSON.stringify(response.data)}`);
         // Token 을 가져왔을 경우 사용자 정보 조회
         const headerUserInfo = {
           'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
           Authorization: 'Bearer ' + response.data.access_token,
         };
-        console.log(`url : ${kakaoTokenUrl}`);
-        console.log(`headers : ${JSON.stringify(headerUserInfo)}`);
         const responseUserInfo = await axios({
           method: 'GET',
           url: kakaoUserInfoUrl,
           timeout: 30000,
           headers: headerUserInfo,
         });
-        console.log(`responseUserInfo.status : ${responseUserInfo.status}`);
         if (responseUserInfo.status === 200) {
-          console.log(
-            `kakaoUserInfo : ${JSON.stringify(responseUserInfo.data)}`,
-          );
           return responseUserInfo.data;
         } else {
           throw new UnauthorizedException();
@@ -62,5 +61,30 @@ export class AuthService {
       console.log(error);
       throw new UnauthorizedException();
     }
+  }
+
+  async kakaoToOwnServiceLogin(
+    kakao: any,
+  ): Promise<{ accessToken: string } | undefined> {
+    // get user data from db
+    const findUser = await this.usersService.findByFields({
+      where: { kakaoId: kakao.id },
+    });
+
+    const user = findUser
+      ? findUser
+      : await this.usersService.createUserBy(kakao);
+
+    const payload: Payload = {
+      id: user.id,
+      name: user.name,
+      authorities: user.authorities,
+    };
+
+    const result = {
+      accessToken: this.jwtService.sign(payload),
+    };
+
+    return result;
   }
 }
