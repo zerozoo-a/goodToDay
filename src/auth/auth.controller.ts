@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('/login')
+  @Post('/kakaoLogin')
   async kakaoLogin(
     @Body('body') req: { body: string },
     @Response() res,
