@@ -50,7 +50,7 @@ export class AuthService {
           headers: headerUserInfo,
         });
         if (responseUserInfo.status === 200) {
-          return responseUserInfo.data;
+          return { userInfo: responseUserInfo.data, auth: response.data };
         } else {
           throw new UnauthorizedException();
         }

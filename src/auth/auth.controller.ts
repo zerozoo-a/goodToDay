@@ -31,6 +31,7 @@ export class AuthController {
       const jwt = await this.authService.kakaoToOwnServiceLogin(kakao);
 
       res.send({
+        kakao,
         accessToken: jwt.accessToken,
         message: 'success',
       });
