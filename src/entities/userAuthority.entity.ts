@@ -12,7 +12,7 @@ export class UserAuthority {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('int', { name: 'user_id' })
+  @Column('int', { name: 'user_id', default: 0 })
   userId: number;
 
   @Column('varchar', { name: 'authority_name' })

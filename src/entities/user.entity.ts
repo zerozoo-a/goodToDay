@@ -6,8 +6,8 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { name: 'kakao_id', length: 45 })
-  kakaoId: string;
+  @Column({ type: 'double', name: 'kakao_id' })
+  kakaoId: number;
 
   @Column('varchar', { name: 'email', length: 100 })
   email: string;
@@ -20,6 +20,13 @@ export class User {
 
   @Column('varchar', { name: 'phone', length: 20, nullable: true })
   phone: string | null;
+
+  @Column('varchar', {
+    name: 'kakao_target_id_type',
+    length: 50,
+    nullable: true,
+  })
+  kakao_target_id_type: string | null;
 
   @Column('varchar', { name: 'birth', length: 10, nullable: true })
   birth: string | null;

@@ -5,6 +5,7 @@ import { UserAuthority } from 'src/entities/userAuthority.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { RoleType } from './role_type';
 import { KakaoUser } from './kakao.user.interface';
+import { KakaoLoginResponse } from 'src/auth/auth.type';
 
 @Injectable()
 export class UsersService {
@@ -15,15 +16,16 @@ export class UsersService {
     private userAuthorityRepository: Repository<UserAuthority>,
   ) {}
 
-  async createUserBy(kakao: KakaoUser): Promise<User | undefined> {
+  async createUserBy(kakao: KakaoLoginResponse): Promise<User | undefined> {
     const user = new User();
 
-    if (kakao.id) user.kakaoId = `${kakao.id}`;
-    if (!kakao.kakao_account.has_email)
+    if (kakao.userInfo.id) user.kakaoId = kakao.userInfo.id;
+    if (!kakao.userInfo.kakao_account.email)
       throw new HttpException('Kakao email is not provided', 416);
 
-    user.email = kakao.kakao_account.email;
-    user.name = kakao.kakao_account.profile.nickname;
+    user.email = kakao.userInfo.kakao_account.email;
+    user.name = kakao.userInfo.kakao_account.profile.nickname;
+    user.kakao_target_id_type = 'user_id';
 
     return await this.registerUser(user);
   }
