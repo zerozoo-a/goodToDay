@@ -1,40 +1,36 @@
 import {
-  Body,
   Controller,
   Post,
   Res,
   BadRequestException,
-  UnauthorizedException,
   Get,
   Headers,
   Req,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-
+import { Response } from 'express';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/loginKakao')
-  async loginKakao(@Body('body') req, @Res() res): Promise<any> {
-    console.log(
-      '🚀 ~ file: auth.controller.ts:19 ~ AuthController ~ loginKakao ~ req:',
-      req,
-    );
+  async loginKakao(@Req() req, @Res() res: Response): Promise<any> {
     try {
-      const { body }: { body: { code: string; domain: string } } =
-        JSON.parse(req);
       // 카카오 토큰 조회 후 계정 정보 가져오기
-      const { code, domain } = body;
+      const { code, domain, redirectURI } = req.body;
       if (!code || !domain) {
         if (!code) throw new BadRequestException(`code is missing`);
         if (!domain) throw new BadRequestException(`domain is missing`);
         throw new BadRequestException(`code, domain is missing`);
       }
 
-      const kakao = await this.authService.loginKakao(body);
+      const kakao = await this.authService.loginKakao({
+        code,
+        domain,
+        redirectURI,
+      });
       const jwt = await this.authService.kakaoToOwnServiceLogin(kakao);
-
       res.send({
         domain: kakao,
         accessToken: jwt.accessToken,
@@ -42,13 +38,16 @@ export class AuthController {
         redirectURL: '/dashboard',
       });
     } catch (e) {
-      console.log('🚀 ~ file: auth.controller.ts:50 ~ AuthController ~ e:', e);
-      throw new UnauthorizedException(e.message);
+      throw new HttpException('message', 400, {
+        cause: new Error('Some Error'),
+      });
     }
   }
 
   @Get('/loginKakaoInfo')
   async loginKakaoInfo(@Headers('authorized') authorized, @Res() res) {
+    // try catch를 통해 로그아웃 상태에서의 핸들링이 필요함
+    // 로그아웃 상태인 경우 token을 인식못하니까 catch에서 처리 필요
     const response = await this.authService.loginKakaoInfo(authorized);
     res.json({
       ...response,
@@ -69,9 +68,9 @@ export class AuthController {
   }
 
   @Post('/logoutKakao')
-  async logoutKakao(@Req() req, @Res() res) {
-    this.authService.logoutKakao(req.headers.authorized);
+  async logoutKakao(@Headers('access_token') access_token, @Res() res) {
+    const response = await this.authService.logoutKakao(access_token);
 
-    res.json({ done: true });
+    res.json(response);
   }
 }

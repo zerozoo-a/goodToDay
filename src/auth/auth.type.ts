@@ -5,6 +5,19 @@ export interface LoginResponse<Domain> {
   redirectURL: string;
 }
 
+export interface LogoutKakaoResponse {
+  id: number;
+  status: number;
+  redirect: string;
+}
+export interface LoginKakaoInfo {
+  expiresInMillis: number;
+  id: number;
+  expires_in: number;
+  app_id: number;
+  appId: number;
+}
+
 export interface KakaoLoginResponse {
   auth: KakaoLoginAuthResponse;
   userInfo: KakaoUserInfo;

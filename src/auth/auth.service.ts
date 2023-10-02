@@ -4,15 +4,12 @@ import * as qs from 'qs';
 import { Payload } from './security/jwt_payload.interface';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { KakaoLoginResponse } from './auth.type';
-
-interface loginKakaoInfo {
-  expiresInMillis: number;
-  id: number;
-  expires_in: number;
-  app_id: number;
-  appId: number;
-}
+import {
+  KakaoLoginResponse,
+  LoginKakaoInfo,
+  LogoutKakaoResponse,
+  loginKakaoInfo,
+} from './auth.type';
 
 @Injectable()
 export class AuthService {
@@ -23,8 +20,9 @@ export class AuthService {
   async loginKakao(options: {
     code: string;
     domain: string;
+    redirectURI: string;
   }): Promise<KakaoLoginResponse> {
-    const { code, domain } = options;
+    const { code, domain, redirectURI } = options;
     const kakaoRestApiKey = '8fc6587f15b62fcab9ddacd8950612df';
     const kakaoTokenUrl = 'https://kauth.kakao.com/oauth/token';
     const kakaoUserInfoUrl = 'https://kapi.kakao.com/v2/user/me';
@@ -32,7 +30,7 @@ export class AuthService {
     const body = {
       grant_type: 'authorization_code',
       client_id: kakaoRestApiKey,
-      redirect_uri: `${domain}/kakao_login_res`,
+      redirect_uri: `${domain}${redirectURI}`,
       code,
       client_secret: clientSecret,
     };
@@ -76,33 +74,22 @@ export class AuthService {
     }
   }
 
-  async logoutKakao(
-    access_token: string,
-    // body: { target_id_type: string; target_id: number },
-  ) {
-    console.log(
-      '🚀 ~ file: auth.service.ts:83 ~ AuthService ~ access_token:',
-      access_token,
-    );
-    // console.log('🚀 ~ file: auth.service.ts:83 ~ AuthService ~ body:', body);
-    // const form = new FormData();
-    // form.append('target_id', `${body.target_id}`);
-    // form.append('target_id_type', body.target_id_type);
-
+  async logoutKakao(access_token: string): Promise<LogoutKakaoResponse> {
     try {
       const response = await axios.post(
         'https://kapi.kakao.com/v1/user/logout',
         {},
         {
           headers: {
-            Authorization: access_token,
+            Authorization: `Bearer ${access_token}`,
             'Content-Type': 'application/json',
           },
         },
       );
-      return response;
+      return { id: response.data.id, status: response.status, redirect: '/' };
     } catch (error) {
-      throw new UnauthorizedException(error.message || error);
+      console.error(error);
+      return undefined;
     }
   }
 
@@ -137,10 +124,10 @@ export class AuthService {
    *
    * @param access_token kakao로 부터 받은 client의 at
    */
-  async loginKakaoInfo(access_token: string): Promise<loginKakaoInfo> {
+  async loginKakaoInfo(access_token: string): Promise<LoginKakaoInfo> {
     const access_token_info =
       'https://kapi.kakao.com/v1/user/access_token_info';
-    const response = await axios.get<loginKakaoInfo>(access_token_info, {
+    const response = await axios.get<LoginKakaoInfo>(access_token_info, {
       headers: {
         Authorization: `${access_token}`,
       },

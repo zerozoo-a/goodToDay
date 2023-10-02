@@ -4,7 +4,6 @@ import { User } from 'src/entities/user.entity';
 import { UserAuthority } from 'src/entities/userAuthority.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { RoleType } from './role_type';
-import { KakaoUser } from './kakao.user.interface';
 import { KakaoLoginResponse } from 'src/auth/auth.type';
 
 @Injectable()
