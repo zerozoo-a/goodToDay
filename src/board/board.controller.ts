@@ -21,16 +21,16 @@ export class BoardController {
   }
 
   @Post('/')
-  async post(@Req() req, @Res() res) {
+  async post(@Req() req, @Res() res): Promise<Result> {
     const isUserTokenValid = await this.usersService.validateHouseToken(
       req.headers.access_token,
     );
     if (!isUserTokenValid.status) {
-      console.log(
-        '🚀 ~ file: board.controller.ts:29 ~ BoardController ~ post ~ isUserTokenValid:',
-        isUserTokenValid,
-      );
-      return res.json({ success: false, err: isUserTokenValid.err });
+      return res.json({
+        success: false,
+        data: { redirect: '/dashboard' },
+        err: isUserTokenValid.err,
+      });
     }
 
     const result = await this.boardService.postArticle({
@@ -39,6 +39,12 @@ export class BoardController {
       userId: isUserTokenValid.userId,
     });
 
-    res.json({ success: true });
+    res.json({ success: true, data: { ...result, redirect: '/dashboard' } });
   }
+}
+
+export interface Result<T = any, K = any> {
+  success: boolean;
+  data: T;
+  err?: K;
 }

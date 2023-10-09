@@ -4,7 +4,6 @@ import { BoardService } from './board.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from 'src/entities/users.entity';
 import { Articles } from 'src/entities/board.entity';
-import { UsersService } from 'src/users/users.service';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({

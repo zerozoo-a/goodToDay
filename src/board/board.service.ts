@@ -25,18 +25,24 @@ export class BoardService {
     title: string;
     context: string;
     userId: any;
-  }) {
+  }): Promise<Result> {
     try {
-      await this.articlesRepository.query(
+      const response = await this.articlesRepository.query(
         `
       INSERT INTO articles (title, context, userId)
-      VALUES (":title", ":context", ":userId")
+      VALUES (?, ?, ?)
       `,
         [title, context, userId],
       );
-      return true;
+      return { success: true, data: response };
     } catch (err) {
-      return false;
+      return { success: false, data: undefined, err };
     }
   }
+}
+
+export interface Result<T = any, K = any> {
+  success: boolean;
+  data: T;
+  err?: K;
 }
