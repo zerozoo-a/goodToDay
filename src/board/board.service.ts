@@ -27,10 +27,13 @@ export class BoardService {
     userId: any;
   }) {
     try {
-      await this.articlesRepository.query(`
-    INSERT INTO articles (title, context, userId)
-    VALUES ("${title}", "${context}", "${userId}")
-    `);
+      await this.articlesRepository.query(
+        `
+      INSERT INTO articles (title, context, userId)
+      VALUES (":title", ":context", ":userId")
+      `,
+        [title, context, userId],
+      );
       return true;
     } catch (err) {
       return false;

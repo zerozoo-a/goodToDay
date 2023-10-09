@@ -1,22 +1,24 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entities/user.entity';
+import { Users } from 'src/entities/users.entity';
 import { UserAuthority } from 'src/entities/userAuthority.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { RoleType } from './role_type';
 import { KakaoLoginResponse } from 'src/auth/auth.type';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(Users)
+    private userRepository: Repository<Users>,
     @InjectRepository(UserAuthority)
     private userAuthorityRepository: Repository<UserAuthority>,
+    private jwtService: JwtService,
   ) {}
 
-  async createUserBy(kakao: KakaoLoginResponse): Promise<User | undefined> {
-    const user = new User();
+  async createUserBy(kakao: KakaoLoginResponse): Promise<Users | undefined> {
+    const user = new Users();
 
     if (kakao.userInfo.id) user.kakaoId = kakao.userInfo.id;
     if (!kakao.userInfo.kakao_account.email)
@@ -29,7 +31,9 @@ export class UsersService {
     return await this.registerUser(user);
   }
 
-  async findByFields(options: FindOneOptions<User>): Promise<User | undefined> {
+  async findByFields(
+    options: FindOneOptions<Users>,
+  ): Promise<Users | undefined> {
     try {
       return await this.userRepository.findOne(options);
     } catch (err) {
@@ -37,7 +41,7 @@ export class UsersService {
     }
   }
 
-  async registerUser(user: User): Promise<User | undefined> {
+  async registerUser(user: Users): Promise<Users | undefined> {
     const savedUser = await this.save(user);
 
     await this.saveUserAuthority(savedUser.id);
@@ -45,7 +49,7 @@ export class UsersService {
     return savedUser;
   }
 
-  async save(user: User): Promise<User | undefined> {
+  async save(user: Users): Promise<Users | undefined> {
     const newUser = await this.userRepository.save(user);
     return newUser;
   }
@@ -62,6 +66,44 @@ export class UsersService {
         'user authority error' + id,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  async validateHouseToken(
+    token: string,
+  ): Promise<{ status: boolean; userId?: number; err?: any }> {
+    try {
+      await this.jwtService.verifyAsync(token);
+
+      /** token 분석 */
+      const decoded = this.jwtService.decode(token) as {
+        [key: string]: any;
+      };
+
+      const userId: number | undefined = decoded.id;
+      if (userId === undefined)
+        return { status: false, err: 'userId is undefined' };
+
+      /** user 정보 가져오기 */
+      await this.findByUserId(userId);
+
+      return { status: true, userId };
+    } catch (err) {
+      return { status: false, userId: undefined, err };
+    }
+  }
+
+  async findByUserId(
+    userId: number,
+  ): Promise<{ status: boolean; data?: any; err?: any } | undefined> {
+    try {
+      const response = await this.userAuthorityRepository.query(
+        'SELECT * FROM users WHERE id=?',
+        [userId],
+      );
+      return { status: false, data: response };
+    } catch (err) {
+      return { status: false, data: undefined, err };
     }
   }
 }

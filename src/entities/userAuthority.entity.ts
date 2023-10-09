@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { Users } from './users.entity';
 
 @Entity('user_authority')
 export class UserAuthority {
@@ -18,7 +18,7 @@ export class UserAuthority {
   @Column('varchar', { name: 'authority_name' })
   authorityName: string;
 
-  @ManyToOne(() => User, (user) => user.authorities)
+  @ManyToOne(() => Users, (user) => user.authorities)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: User;
+  user: Users;
 }

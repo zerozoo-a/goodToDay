@@ -1,15 +1,9 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  OneToMany,
-  ManyToOne,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { UserAuthority } from './userAuthority.entity';
 import { Articles } from './board.entity';
 
-@Entity('user', { schema: 'boarder' })
-export class User {
+@Entity('users')
+export class Users {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
@@ -21,7 +15,6 @@ export class User {
 
   @Column('varchar', { name: 'name', nullable: true, length: 45 })
   name: string | null;
-
   @Column('varchar', { name: 'gender', length: 10, nullable: true })
   gender: string | null;
 

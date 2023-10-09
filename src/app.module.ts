@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ormConfig } from './orm.config';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { BoardModule } from './board/board.mdoule';
+import { BoardModule } from './board/board.module';
 
 @Module({
   imports: [
