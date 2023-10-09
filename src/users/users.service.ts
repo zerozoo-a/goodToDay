@@ -6,6 +6,7 @@ import { FindOneOptions, Repository } from 'typeorm';
 import { RoleType } from './role_type';
 import { KakaoLoginResponse } from 'src/auth/auth.type';
 import { JwtService } from '@nestjs/jwt';
+import { Result } from 'src/board/board.service';
 
 @Injectable()
 export class UsersService {
@@ -104,6 +105,40 @@ export class UsersService {
       return { status: false, data: response };
     } catch (err) {
       return { status: false, data: undefined, err };
+    }
+  }
+
+  async findByUserEmail(email: string): Promise<Result> {
+    try {
+      const data = await this.userRepository.query(
+        `
+      SELECT *
+      FROM users
+      WHERE email=?
+      `,
+        [email],
+      );
+
+      return { success: true, data };
+    } catch (err) {
+      return { success: false, data: undefined, err };
+    }
+  }
+
+  async findBy(prop: 'nickname' | 'email', value: string): Promise<Result> {
+    try {
+      const data = await this.userRepository.query(
+        `
+      SELECT *
+      FROM users
+      WHERE ${prop}=?
+      `,
+        [value],
+      );
+
+      return { success: true, data: data.length !== 0 };
+    } catch (err) {
+      return { success: false, data: undefined, err };
     }
   }
 }
