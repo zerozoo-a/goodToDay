@@ -8,7 +8,6 @@ import {
   KakaoLoginResponse,
   LoginKakaoInfo,
   LogoutKakaoResponse,
-  loginKakaoInfo,
 } from './auth.type';
 
 @Injectable()
@@ -81,7 +80,7 @@ export class AuthService {
         {},
         {
           headers: {
-            Authorization: `Bearer ${access_token}`,
+            Authorization: access_token,
             'Content-Type': 'application/json',
           },
         },

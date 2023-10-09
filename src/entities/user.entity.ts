@@ -1,5 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToOne,
+} from 'typeorm';
 import { UserAuthority } from './userAuthority.entity';
+import { Articles } from './board.entity';
 
 @Entity('user', { schema: 'boarder' })
 export class User {
@@ -52,4 +59,7 @@ export class User {
     eager: true,
   })
   authorities?: any[];
+
+  @OneToMany(() => Articles, (articles) => articles.user)
+  articles;
 }

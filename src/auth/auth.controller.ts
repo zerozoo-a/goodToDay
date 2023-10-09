@@ -68,9 +68,15 @@ export class AuthController {
   }
 
   @Post('/logoutKakao')
-  async logoutKakao(@Headers('access_token') access_token, @Res() res) {
-    const response = await this.authService.logoutKakao(access_token);
-
-    res.json(response);
+  async logoutKakao(
+    @Headers('access_token') access_token,
+    @Res() res: Response,
+  ) {
+    try {
+      const response = await this.authService.logoutKakao(access_token);
+      res.json(response);
+    } catch (err) {
+      res.send(err);
+    }
   }
 }

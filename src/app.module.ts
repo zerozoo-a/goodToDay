@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ormConfig } from './orm.config';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { BoardModule } from './board/board.mdoule';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
     ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
     AuthModule,
+    BoardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
