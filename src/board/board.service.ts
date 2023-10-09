@@ -9,12 +9,19 @@ export class BoardService {
     @InjectRepository(Articles)
     private articlesRepository: Repository<Articles>,
   ) {}
-  async articles() {
-    const test = await this.articlesRepository.query(`
-    SELECT * FROM articles
+  async articles(): Promise<Result<Post>> {
+    try {
+      const data = await this.articlesRepository.query(`
+    SELECT * 
+    FROM articles
+    ORDER BY created_at DESC
+    LIMIT 10
     `);
 
-    return test;
+      return { success: true, data };
+    } catch (err) {
+      return { success: false, data: undefined, err };
+    }
   }
 
   async postArticle({
@@ -45,4 +52,13 @@ export interface Result<T = any, K = any> {
   success: boolean;
   data: T;
   err?: K;
+}
+
+interface Post {
+  id: number;
+  title: string;
+  context: string;
+  created_at: string;
+  modified_at: string;
+  userId: number;
 }

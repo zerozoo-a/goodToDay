@@ -25,6 +25,7 @@ export class BoardController {
     const isUserTokenValid = await this.usersService.validateHouseToken(
       req.headers.access_token,
     );
+    /** 인증 실패 */
     if (!isUserTokenValid.status) {
       return res.json({
         success: false,
@@ -33,6 +34,7 @@ export class BoardController {
       });
     }
 
+    /** 글 작성 성공 */
     const result = await this.boardService.postArticle({
       title: req.body.title,
       context: req.body.context,
