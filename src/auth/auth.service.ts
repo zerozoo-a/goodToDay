@@ -102,7 +102,7 @@ export class AuthService {
 
     const user = findUser
       ? findUser
-      : await this.usersService.createUserBy(kakao);
+      : await this.usersService.createUserWithKakao(kakao);
 
     const payload: Payload = {
       id: user.id,

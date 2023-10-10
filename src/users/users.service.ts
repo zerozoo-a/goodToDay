@@ -18,7 +18,9 @@ export class UsersService {
     private jwtService: JwtService,
   ) {}
 
-  async createUserBy(kakao: KakaoLoginResponse): Promise<Users | undefined> {
+  async createUserWithKakao(
+    kakao: KakaoLoginResponse,
+  ): Promise<Users | undefined> {
     const user = new Users();
 
     if (kakao.userInfo.id) user.kakaoId = kakao.userInfo.id;
@@ -136,7 +138,7 @@ export class UsersService {
         [value],
       );
 
-      return { success: true, data: data.length !== 0 };
+      return { success: true, data };
     } catch (err) {
       return { success: false, data: undefined, err };
     }

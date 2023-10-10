@@ -6,9 +6,10 @@ import {
   Headers,
   Post,
   Req,
+  Body,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { Result } from 'src/board/board.service';
+import { CreateUserDto } from 'src/dto/CreateUser.dto';
 
 @Controller('users')
 export class UsersController {
@@ -23,28 +24,6 @@ export class UsersController {
     }
   }
 
-  // @Post('/findbyuseremail')
-  // async findByUserEmail(@Req() req, @Res() res) {
-  //   try {
-  //     const data = await this.userService.findByUserEmail(req.body.email);
-
-  //     res.json({ success: true, data });
-  //   } catch (err) {
-  //     res.json({ success: false, data: undefined, err });
-  //   }
-  // }
-
-  // @Post('/findbyusernickname')
-  // async findByUserNickname(@Req() req, @Res() res) {
-  //   try {
-  //     const data = await this.userService.findByUserNickname(req.body.nickname);
-
-  //     res.json({ success: true, data });
-  //   } catch (err) {
-  //     res.json({ success: false, data: undefined, err });
-  //   }
-  // }
-
   @Post('/findBy/:prop')
   async findByUser(@Req() req, @Res() res) {
     try {
@@ -52,10 +31,18 @@ export class UsersController {
         req.params.prop,
         req.body[req.params.prop],
       );
-
-      res.json({ success: true, data });
+      res.json(data);
     } catch (err) {
       res.json({ success: false, data: undefined, err });
     }
+  }
+
+  @Post('/createHouseUser')
+  async createHouseUser(@Body() createUserDto: CreateUserDto) {
+    console.log(
+      '🚀 ~ file: users.controller.ts:41 ~ UsersController ~ createHouseUser ~ createUserDto:',
+      createUserDto,
+    );
+    Promise.resolve({ hi: 'done' });
   }
 }
