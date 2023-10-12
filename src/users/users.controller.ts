@@ -46,7 +46,7 @@ export class UsersController {
     ]);
 
     if (existEmailUser.data.length !== 0) {
-      return res.send({
+      return res.status(409).json({
         success: false,
         data: { message: 'email이 이미 등록되어 있습니다.' },
       });
@@ -56,12 +56,14 @@ export class UsersController {
     const salt = await genSalt(saltRound);
     const hashedPassword = await hash(createUserDto.password, salt);
     createUserDto.password = hashedPassword;
-    const data = await this.userService.createHouseUser(createUserDto);
+    const { success, data } = await this.userService.createHouseUser(
+      createUserDto,
+    );
 
-    if (!data.success) {
-      res.send({ success: true, data });
+    if (!success) {
+      res.json({ success: true, data });
     } else {
-      res.status(409).send({ success: false, data });
+      res.status(409).json({ success: false, data });
     }
   }
 }
