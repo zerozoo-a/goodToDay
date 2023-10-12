@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  Index,
+} from 'typeorm';
 import { UserAuthority } from './userAuthority.entity';
 import { Articles } from './board.entity';
 
@@ -7,14 +13,20 @@ export class Users {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column({ type: 'double', name: 'kakao_id' })
+  @Column({ type: 'double', name: 'kakao_id', nullable: true })
   kakaoId: number;
 
-  @Column('varchar', { name: 'email', length: 100 })
+  @Index({ unique: true })
+  @Column('varchar', {
+    name: 'email',
+    length: 100,
+    nullable: false,
+  })
   email: string;
 
   @Column('varchar', { name: 'name', nullable: true, length: 45 })
   name: string | null;
+
   @Column('varchar', { name: 'gender', length: 10, nullable: true })
   gender: string | null;
 
@@ -47,6 +59,13 @@ export class Users {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date | null;
+
+  @Column('varchar', {
+    nullable: false,
+    name: 'password_hash',
+    length: 255,
+  })
+  passwordHash: string;
 
   @OneToMany(() => UserAuthority, (userAuthority) => userAuthority.user, {
     eager: true,

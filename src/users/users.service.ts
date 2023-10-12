@@ -7,6 +7,7 @@ import { RoleType } from './role_type';
 import { KakaoLoginResponse } from 'src/auth/auth.type';
 import { JwtService } from '@nestjs/jwt';
 import { Result } from 'src/board/board.service';
+import { CreateUserDto } from 'src/dto/CreateUser.dto';
 
 @Injectable()
 export class UsersService {
@@ -127,7 +128,7 @@ export class UsersService {
     }
   }
 
-  async findBy(prop: 'nickname' | 'email', value: string): Promise<Result> {
+  async findBy(prop: 'name' | 'email', value: string): Promise<Result> {
     try {
       const data = await this.userRepository.query(
         `
@@ -141,6 +142,26 @@ export class UsersService {
       return { success: true, data };
     } catch (err) {
       return { success: false, data: undefined, err };
+    }
+  }
+
+  async createHouseUser(createUserDto: CreateUserDto) {
+    try {
+      const data = await this.userRepository.query(
+        `
+        INSERT INTO users (email, password_hash, name)
+        VALUES (?, ?, ?);
+        `,
+        [createUserDto.email, createUserDto.password, createUserDto.name],
+      );
+
+      return { success: true, data };
+    } catch (err) {
+      return {
+        success: false,
+        data: undefined,
+        err: { ...err, reason: '이미 존재하는 email입니다.' },
+      };
     }
   }
 }
