@@ -18,7 +18,7 @@ export class BoardService {
     LIMIT 10
     `);
 
-      return { success: true, data };
+      return { success: true, data, err: undefined };
     } catch (err) {
       return { success: false, data: undefined, err };
     }
@@ -41,7 +41,7 @@ export class BoardService {
       `,
         [title, context, userId],
       );
-      return { success: true, data: response };
+      return { success: true, data: response, err: undefined };
     } catch (err) {
       return { success: false, data: undefined, err };
     }
@@ -51,7 +51,7 @@ export class BoardService {
 export interface Result<T = any, K = any> {
   success: boolean;
   data: T;
-  err?: K;
+  err: K;
 }
 
 interface Post {

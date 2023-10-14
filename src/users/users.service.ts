@@ -122,7 +122,7 @@ export class UsersService {
         [email],
       );
 
-      return { success: true, data };
+      return { success: true, data, err: undefined };
     } catch (err) {
       return { success: false, data: undefined, err };
     }
@@ -139,7 +139,7 @@ export class UsersService {
         [value],
       );
 
-      return { success: true, data };
+      return { success: true, data, err: undefined };
     } catch (err) {
       return { success: false, data: undefined, err };
     }

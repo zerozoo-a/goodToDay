@@ -7,11 +7,20 @@ import {
   Post,
   Req,
   Body,
+  HttpException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from 'src/dto/CreateUser.dto';
 // import { genSalt, hash } from 'bcrypt';
 import { genSalt, hash } from 'bcrypt';
+import { Result } from 'src/board/board.service';
+
+// type ErrorMessageKey = "name" | "email" | "password" | "confirm";
+// errorDto
+interface CreateHouseUserErrorDto {
+  path: string[];
+  message: string;
+}
 
 @Controller('users')
 export class UsersController {
@@ -46,10 +55,16 @@ export class UsersController {
     ]);
 
     if (existEmailUser.data.length !== 0) {
-      return res.status(409).json({
-        success: false,
-        data: { message: 'email이 이미 등록되어 있습니다.' },
-      });
+      throw new HttpException(
+        <Result<CreateHouseUserErrorDto>>{
+          success: false,
+          data: undefined,
+          err: [
+            { path: ['email'], message: 'email이 이미 등록되어 있습니다.' },
+          ],
+        },
+        409,
+      );
     }
 
     const saltRound = 10;

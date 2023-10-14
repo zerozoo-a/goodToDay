@@ -2,6 +2,7 @@ import { Controller, Post } from '@nestjs/common';
 import { Req, Res, Get } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { UsersService } from 'src/users/users.service';
+import { Result } from './board.service';
 
 @Controller('board')
 export class BoardController {
@@ -43,10 +44,4 @@ export class BoardController {
 
     res.json({ success: true, data: { ...result, redirect: '/dashboard' } });
   }
-}
-
-export interface Result<T = any, K = any> {
-  success: boolean;
-  data: T;
-  err?: K;
 }
