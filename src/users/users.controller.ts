@@ -8,12 +8,15 @@ import {
   Req,
   Body,
   HttpException,
+  HttpCode,
+  Header,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from 'src/dto/CreateUser.dto';
 // import { genSalt, hash } from 'bcrypt';
 import { genSalt, hash } from 'bcrypt';
 import { Result } from 'src/board/board.service';
+import type { Response } from 'express';
 
 // type ErrorMessageKey = "name" | "email" | "password" | "confirm";
 // errorDto
@@ -26,7 +29,10 @@ interface CreateHouseUserErrorDto {
 export class UsersController {
   constructor(private userService: UsersService) {}
   @Get('/validateHouseToken')
-  async validateHouseToken(@Headers('access_token') access_token, @Res() res) {
+  async validateHouseToken(
+    @Headers('access_token') access_token,
+    @Res() res: Response,
+  ) {
     if (!access_token) throw new UnauthorizedException();
     const isValid = await this.userService.validateHouseToken(access_token);
 
@@ -49,7 +55,12 @@ export class UsersController {
   }
 
   @Post('/createHouseUser')
-  async createHouseUser(@Body() createUserDto: CreateUserDto, @Res() res) {
+  @Header('Cache-Control', 'none')
+  @HttpCode(201)
+  async createHouseUser(
+    @Body() createUserDto: CreateUserDto,
+    @Res() res: Response,
+  ) {
     const [existEmailUser] = await Promise.all([
       this.userService.findBy('email', createUserDto.email),
     ]);
@@ -75,10 +86,20 @@ export class UsersController {
       createUserDto,
     );
 
-    if (!success) {
-      res.json({ success: true, data });
+    /** set MIME */
+    res.header('Content-Type', 'application/json');
+
+    if (success) {
+      /** set HTTP message */
+      data.message = '계정이 생성되었습니다.';
+      res.json({
+        success: true,
+        data,
+      });
     } else {
-      res.status(409).json({ success: false, data });
+      /** set HTTP message */
+      data.message = 'An unknown error occurred.';
+      res.status(500).json({ success: false, data });
     }
   }
 }
