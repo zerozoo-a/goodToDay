@@ -54,6 +54,12 @@ export interface Result<T = any, K = any> {
   err: K;
 }
 
+// export class Result<T, K> {
+//   success: boolean;
+//   data: T;
+//   err: K;
+// }
+
 interface Post {
   id: number;
   title: string;

@@ -7,12 +7,36 @@ import {
   Headers,
   Req,
   HttpException,
+  HttpCode,
+  Body,
+  Header,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
+import { LoginUserDto } from 'src/dto/LoginUser.dto';
+import { UsersService } from 'src/users/users.service';
+import { CreateUserDto } from 'src/dto/CreateUser.dto';
+
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
+
+  @Get('/validateHouseToken')
+  async validateHouseToken(
+    @Headers('access_token') access_token,
+    @Res() res: Response,
+  ) {
+    if (!access_token) throw new UnauthorizedException();
+    const isValid = await this.usersService.validateHouseToken(access_token);
+
+    if (isValid.status) {
+    } else {
+    }
+  }
 
   @Post('/loginKakao')
   async loginKakao(@Req() req, @Res() res: Response): Promise<any> {
@@ -77,6 +101,54 @@ export class AuthController {
       res.json(response);
     } catch (err) {
       res.send(err);
+    }
+  }
+
+  @Get('/checkHouseToken')
+  async checkHouseToken(
+    @Headers('Authorization') token: string,
+    @Res() res: Response,
+  ) {
+    const response = await this.authService.checkHouseToken(
+      token.split(' ')[1],
+    );
+
+    res.json(response);
+  }
+
+  @Post('/loginHouseUser')
+  @HttpCode(200)
+  async loginHouseUser(
+    @Body() loginUserDto: LoginUserDto,
+    @Res() res: Response,
+  ) {
+    const response = await this.authService.loginHouseUser(loginUserDto);
+    res.header('Content-Type', 'application/json');
+    res.send(response);
+  }
+
+  @Post('/createHouseUser')
+  @Header('Cache-Control', 'none')
+  @HttpCode(201)
+  async createHouseUser(
+    @Body() createUserDto: CreateUserDto,
+    @Res() res: Response,
+  ) {
+    const { success, data } = await this.authService.createHouseUser(
+      createUserDto,
+    );
+
+    res.header('Content-Type', 'application/json');
+    if (success) {
+      /** set HTTP message */
+      res.json({
+        success: true,
+        data,
+      });
+    } else {
+      /** set HTTP message */
+      data.message = 'An unknown error occurred.';
+      res.status(500).json({ success: false, data });
     }
   }
 }

@@ -1,5 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
-import { Req, Res, Get } from '@nestjs/common';
+import { Controller, Post, Req, Res, Get, Headers, Body } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { UsersService } from 'src/users/users.service';
 import { Result } from './board.service';
@@ -11,7 +10,7 @@ export class BoardController {
     private usersService: UsersService,
   ) {}
 
-  @Get('/')
+  @Get()
   async board(@Req() req, @Res() res) {
     try {
       const articles = await this.boardService.articles();
@@ -21,10 +20,14 @@ export class BoardController {
     }
   }
 
-  @Post('/')
-  async post(@Req() req, @Res() res): Promise<Result> {
+  @Post()
+  async post(
+    @Headers('Authorization') authorization,
+    @Body() body,
+    @Res() res,
+  ): Promise<Result> {
     const isUserTokenValid = await this.usersService.validateHouseToken(
-      req.headers.access_token,
+      authorization.split(' ')[1],
     );
     /** 인증 실패 */
     if (!isUserTokenValid.status) {
@@ -37,8 +40,8 @@ export class BoardController {
 
     /** 글 작성 성공 */
     const result = await this.boardService.postArticle({
-      title: req.body.title,
-      context: req.body.context,
+      title: body.title,
+      context: body.context,
       userId: isUserTokenValid.userId,
     });
 

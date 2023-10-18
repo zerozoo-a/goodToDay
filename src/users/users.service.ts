@@ -77,19 +77,28 @@ export class UsersService {
     token: string,
   ): Promise<{ status: boolean; userId?: number; err?: any }> {
     try {
-      await this.jwtService.verifyAsync(token);
-
       /** token 분석 */
       const decoded = this.jwtService.decode(token) as {
         [key: string]: any;
       };
 
+      console.log(
+        '🚀 ~ file: users.service.ts:82 ~ UsersService ~ decoded ~ decoded:',
+        decoded,
+      );
+
+      /**  */
+      if (decoded.id === undefined && decoded.email !== undefined) {
+        const { success, data, err } = await this.findByUserEmail(
+          decoded.email,
+        );
+        if (success) decoded.id = data[0].id;
+        else throw new HttpException({ message: err }, 500);
+      }
+
       const userId: number | undefined = decoded.id;
       if (userId === undefined)
         return { status: false, err: 'userId is undefined' };
-
-      /** user 정보 가져오기 */
-      await this.findByUserId(userId);
 
       return { status: true, userId };
     } catch (err) {
