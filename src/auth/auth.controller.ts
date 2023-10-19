@@ -143,7 +143,9 @@ export class AuthController {
       /** set HTTP message */
       res.json({
         success: true,
-        data,
+        data: {
+          message: `${createUserDto.email} 계정이 성공적으로 생성되었습니다.`,
+        },
       });
     } else {
       /** set HTTP message */

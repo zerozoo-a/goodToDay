@@ -82,11 +82,6 @@ export class UsersService {
         [key: string]: any;
       };
 
-      console.log(
-        '🚀 ~ file: users.service.ts:82 ~ UsersService ~ decoded ~ decoded:',
-        decoded,
-      );
-
       /**  */
       if (decoded.id === undefined && decoded.email !== undefined) {
         const { success, data, err } = await this.findByUserEmail(
@@ -169,7 +164,7 @@ export class UsersService {
       return {
         success: false,
         data: undefined,
-        err: { ...err, reason: '이미 존재하는 email입니다.' },
+        err: { ...err, message: '이미 존재하는 email입니다.' },
       };
     }
   }

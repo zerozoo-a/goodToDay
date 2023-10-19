@@ -12,7 +12,7 @@ export class BoardService {
   async articles(): Promise<Result<Post>> {
     try {
       const data = await this.articlesRepository.query(`
-    SELECT * 
+    SELECT id, title, created_at, modified_at, userId 
     FROM articles
     ORDER BY created_at DESC
     LIMIT 10

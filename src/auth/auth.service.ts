@@ -267,7 +267,7 @@ export class AuthService {
     const hashedPassword = await hash(createUserDto.password, salt);
     createUserDto.password = hashedPassword;
 
-    /** db에 hasing된 비밀번호로 저장 */
+    /** db에 hashing된 비밀번호로 저장 */
     const { success, data } = await this.usersService.createHouseUser(
       createUserDto,
     );
