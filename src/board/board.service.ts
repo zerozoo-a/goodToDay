@@ -28,17 +28,13 @@ export class BoardService {
     try {
       const data = await this.articlesRepository.query(
         `
-      SELECT id, title, context, created_at, modified_at, name
+      SELECT articles.id, title, context, articles.created_at, articles.modified_at, name
       FROM articles
       LEFT JOIN users
       ON articles.userId = users.id
       WHERE articles.id=?
       `,
         [id],
-      );
-      console.log(
-        '🚀 ~ file: board.service.ts:39 ~ BoardService ~ article ~ data:',
-        data,
       );
 
       return { success: true, data, err: undefined };
