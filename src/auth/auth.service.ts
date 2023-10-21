@@ -136,18 +136,18 @@ export class AuthService {
   }
 
   async checkHouseToken(token: string) {
-    const decodedToken = await this.jwtService.verifyAsync(token);
-    if (this.getCurrentTimestamp() > decodedToken.exp) {
+    try {
+      const result = await this.jwtService.verifyAsync(token);
+      return {
+        success: true,
+        data: { result },
+        err: undefined,
+      };
+    } catch (err) {
       return {
         success: false,
         data: undefined,
         err: { message: 'token expired' },
-      };
-    } else {
-      return {
-        success: true,
-        data: { message: 'token is valid' },
-        err: undefined,
       };
     }
   }

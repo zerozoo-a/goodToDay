@@ -1,4 +1,13 @@
-import { Controller, Post, Req, Res, Get, Headers, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Req,
+  Res,
+  Get,
+  Headers,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { BoardService } from './board.service';
 import { UsersService } from 'src/users/users.service';
 import { Result } from './board.service';
@@ -9,6 +18,16 @@ export class BoardController {
     private boardService: BoardService,
     private usersService: UsersService,
   ) {}
+
+  @Get('/:id')
+  async article(@Param('id') id: string, @Res() res) {
+    try {
+      const articles = await this.boardService.article(id);
+      res.json(articles.data[0]);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   @Get()
   async board(@Req() req, @Res() res) {

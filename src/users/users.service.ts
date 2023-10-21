@@ -132,7 +132,7 @@ export class UsersService {
     }
   }
 
-  async findBy(prop: 'name' | 'email', value: string): Promise<Result> {
+  async findBy(prop: 'email' | 'id', value: string): Promise<Result> {
     try {
       const data = await this.userRepository.query(
         `

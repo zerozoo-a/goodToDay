@@ -24,6 +24,29 @@ export class BoardService {
     }
   }
 
+  async article(id: string): Promise<Result> {
+    try {
+      const data = await this.articlesRepository.query(
+        `
+      SELECT id, title, context, created_at, modified_at, name
+      FROM articles
+      LEFT JOIN users
+      ON articles.userId = users.id
+      WHERE articles.id=?
+      `,
+        [id],
+      );
+      console.log(
+        '🚀 ~ file: board.service.ts:39 ~ BoardService ~ article ~ data:',
+        data,
+      );
+
+      return { success: true, data, err: undefined };
+    } catch (err) {
+      return { success: false, data: undefined, err };
+    }
+  }
+
   async postArticle({
     title,
     context,
@@ -53,12 +76,6 @@ export interface Result<T = any, K = any> {
   data: T;
   err: K;
 }
-
-// export class Result<T, K> {
-//   success: boolean;
-//   data: T;
-//   err: K;
-// }
 
 interface Post {
   id: number;
