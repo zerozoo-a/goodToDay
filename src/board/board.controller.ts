@@ -22,17 +22,17 @@ export class BoardController {
   @Get('/:id')
   async article(@Param('id') id: string, @Res() res) {
     try {
-      const articles = await this.boardService.article(id);
-      res.json(articles.data[0]);
+      const article = await this.boardService.article(id);
+      res.json(article.data[0]);
     } catch (err) {
       console.error(err);
     }
   }
 
-  @Get()
-  async board(@Req() req, @Res() res) {
+  @Get('/pages/:page')
+  async articles(@Param('page') page, @Res() res) {
     try {
-      const articles = await this.boardService.articles();
+      const articles = await this.boardService.articles(+page);
       res.json(articles);
     } catch (err) {
       console.error(err);

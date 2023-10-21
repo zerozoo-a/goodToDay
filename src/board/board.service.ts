@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Articles } from 'src/entities/board.entity';
 import { Repository } from 'typeorm';
@@ -9,14 +9,27 @@ export class BoardService {
     @InjectRepository(Articles)
     private articlesRepository: Repository<Articles>,
   ) {}
-  async articles(): Promise<Result<Post>> {
+
+  async articles(page = 1): Promise<Result<Post>> {
     try {
-      const data = await this.articlesRepository.query(`
-    SELECT id, title, created_at, modified_at, userId 
-    FROM articles
-    ORDER BY created_at DESC
-    LIMIT 10
-    `);
+      if (!Number.isSafeInteger(page))
+        throw new HttpException({ message: 'page arg is not acceptable' }, 500);
+
+      page = page || 1;
+      const itemsPerPage = 5;
+      const offset = (page - 1) * itemsPerPage;
+
+      const data = await this.articlesRepository.query(
+        `
+        SELECT id, title, created_at, modified_at, userId,
+        (SELECT COUNT(*) FROM boarder.articles) AS total_articles
+        FROM boarder.articles
+        ORDER BY created_at DESC
+        LIMIT ?
+        OFFSET ?;
+        `,
+        [itemsPerPage, offset],
+      );
 
       return { success: true, data, err: undefined };
     } catch (err) {
@@ -80,4 +93,5 @@ interface Post {
   created_at: string;
   modified_at: string;
   userId: number;
+  total_articles: number;
 }
