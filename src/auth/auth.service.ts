@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import axios from 'axios';
 import * as qs from 'qs';
-import { Payload } from './security/jwt_payload.interface';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -103,31 +102,6 @@ export class AuthService {
       console.error(error);
       return undefined;
     }
-  }
-
-  async kakaoToOwnServiceLogin(
-    kakao: KakaoLoginResponse,
-  ): Promise<{ accessToken: string } | undefined> {
-    // get user data from db
-    const findUser = await this.usersService.findByFields({
-      where: { kakaoId: kakao.userInfo.id },
-    });
-
-    const user = findUser
-      ? findUser
-      : await this.usersService.createUserWithKakao(kakao);
-
-    const payload: Payload = {
-      id: user.id,
-      name: user.name,
-      authorities: user.authorities,
-    };
-
-    const result = {
-      accessToken: this.jwtService.sign(payload),
-    };
-
-    return result;
   }
 
   async createTokenWith<P extends object>(payload: P) {
@@ -236,18 +210,25 @@ export class AuthService {
 
     const token = await this.createTokenWith(existEmailUser.data[0]);
 
-    // res.header('Content-Type', 'application/json');
-    // res.send({ success: true, data: token, err: undefined });
     return { success: true, data: token, err: undefined };
   }
 
   async createHouseUser(createUserDto: CreateUserDto) {
-    const existEmailUser = await this.usersService.findBy(
-      'email',
-      createUserDto.email,
-    );
+    const [existUserEmail, existUserName] = await Promise.all([
+      this.usersService.findBy('email', createUserDto.email),
+      this.usersService.findBy('name', createUserDto.name),
+    ]);
 
-    if (existEmailUser.data.length !== 0) {
+    if (existUserName.data.length !== 0) {
+      throw new HttpException(
+        <Result<ErrorDto>>{
+          success: false,
+          data: undefined,
+          err: [{ path: ['name'], message: 'name이 이미 등록되어 있습니다.' }],
+        },
+        409,
+      );
+    } else if (existUserEmail.data.length !== 0) {
       throw new HttpException(
         <Result<ErrorDto>>{
           success: false,

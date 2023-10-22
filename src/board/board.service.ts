@@ -41,7 +41,7 @@ export class BoardService {
     try {
       const data = await this.articlesRepository.query(
         `
-      SELECT articles.id, title, context, articles.created_at, articles.modified_at, name
+      SELECT articles.id, title, context, articles.created_at, articles.modified_at, name, users.id as userId
       FROM articles
       LEFT JOIN users
       ON articles.userId = users.id

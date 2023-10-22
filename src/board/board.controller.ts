@@ -20,9 +20,20 @@ export class BoardController {
   ) {}
 
   @Get('/:id')
-  async article(@Param('id') id: string, @Res() res) {
+  async article(@Req() req: Request, @Param('id') id: string, @Res() res) {
     try {
-      const article = await this.boardService.article(id);
+      const houseToken = req.headers['authorization'] ?? undefined;
+
+      const [article, getUserId] = await Promise.all([
+        this.boardService.article(id),
+        this.usersService.validateHouseToken(houseToken.split(' ')[1]),
+      ]);
+
+      const isArticleOwner = (article.data[0].isOwner =
+        getUserId.data.userId === article.data[0].userId);
+
+      article.data[0].isArticleOwner = isArticleOwner;
+
       res.json(article.data[0]);
     } catch (err) {
       console.error(err);
@@ -61,7 +72,7 @@ export class BoardController {
     const result = await this.boardService.postArticle({
       title: body.title,
       context: body.context,
-      userId: isUserTokenValid.userId,
+      userId: isUserTokenValid.data.userId,
     });
 
     res.json({ success: true, data: { ...result, redirect: '/dashboard' } });

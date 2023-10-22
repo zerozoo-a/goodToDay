@@ -13,8 +13,8 @@ export class Users {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column({ type: 'double', name: 'kakao_id', nullable: true })
-  kakaoId: number;
+  // @Column({ type: 'double', name: 'kakao_id', nullable: true })
+  // kakaoId: number;
 
   @Index({ unique: true })
   @Column('varchar', {
@@ -24,7 +24,7 @@ export class Users {
   })
   email: string;
 
-  @Column('varchar', { name: 'name', nullable: true, length: 45 })
+  @Column('varchar', { name: 'name', nullable: true, length: 45, unique: true })
   name: string | null;
 
   @Column('varchar', { name: 'gender', length: 10, nullable: true })
@@ -33,12 +33,12 @@ export class Users {
   @Column('varchar', { name: 'phone', length: 20, nullable: true })
   phone: string | null;
 
-  @Column('varchar', {
-    name: 'kakao_target_id_type',
-    length: 50,
-    nullable: true,
-  })
-  kakao_target_id_type: string | null;
+  // @Column('varchar', {
+  //   name: 'kakao_target_id_type',
+  //   length: 50,
+  //   nullable: true,
+  // })
+  // kakao_target_id_type: string | null;
 
   @Column('varchar', { name: 'birth', length: 10, nullable: true })
   birth: string | null;

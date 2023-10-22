@@ -4,7 +4,7 @@ import { Users } from 'src/entities/users.entity';
 import { UserAuthority } from 'src/entities/userAuthority.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { RoleType } from './role_type';
-import { KakaoLoginResponse } from 'src/auth/auth.type';
+// import { KakaoLoginResponse } from 'src/auth/auth.type';
 import { JwtService } from '@nestjs/jwt';
 import { Result } from 'src/board/board.service';
 import { CreateUserDto } from 'src/dto/CreateUser.dto';
@@ -18,22 +18,6 @@ export class UsersService {
     private userAuthorityRepository: Repository<UserAuthority>,
     private jwtService: JwtService,
   ) {}
-
-  async createUserWithKakao(
-    kakao: KakaoLoginResponse,
-  ): Promise<Users | undefined> {
-    const user = new Users();
-
-    if (kakao.userInfo.id) user.kakaoId = kakao.userInfo.id;
-    if (!kakao.userInfo.kakao_account.email)
-      throw new HttpException('Kakao email is not provided', 416);
-
-    user.email = kakao.userInfo.kakao_account.email;
-    user.name = kakao.userInfo.kakao_account.profile.nickname;
-    user.kakao_target_id_type = 'user_id';
-
-    return await this.registerUser(user);
-  }
 
   async findByFields(
     options: FindOneOptions<Users>,
@@ -75,7 +59,7 @@ export class UsersService {
 
   async validateHouseToken(
     token: string,
-  ): Promise<{ status: boolean; userId?: number; err?: any }> {
+  ): Promise<{ status: boolean; data: { userId?: number }; err?: any }> {
     try {
       /** token 분석 */
       const decoded = this.jwtService.decode(token) as {
@@ -93,11 +77,11 @@ export class UsersService {
 
       const userId: number | undefined = decoded.id;
       if (userId === undefined)
-        return { status: false, err: 'userId is undefined' };
+        return { status: false, data: undefined, err: 'userId is undefined' };
 
-      return { status: true, userId };
+      return { status: true, data: { userId } };
     } catch (err) {
-      return { status: false, userId: undefined, err };
+      return { status: false, data: undefined, err };
     }
   }
 
@@ -132,7 +116,7 @@ export class UsersService {
     }
   }
 
-  async findBy(prop: 'email' | 'id', value: string): Promise<Result> {
+  async findBy(prop: 'email' | 'id' | 'name', value: string): Promise<Result> {
     try {
       const data = await this.userRepository.query(
         `
