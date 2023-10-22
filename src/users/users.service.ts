@@ -57,16 +57,17 @@ export class UsersService {
     }
   }
 
-  async validateHouseToken(
-    token: string,
-  ): Promise<{ status: boolean; data: { userId?: number }; err?: any }> {
+  async validateHouseToken(token: string): Promise<{
+    status: boolean;
+    data: { userId?: number; userName?: string };
+    err?: any;
+  }> {
     try {
       /** token 분석 */
       const decoded = this.jwtService.decode(token) as {
         [key: string]: any;
       };
 
-      /**  */
       if (decoded.id === undefined && decoded.email !== undefined) {
         const { success, data, err } = await this.findByUserEmail(
           decoded.email,
@@ -79,7 +80,7 @@ export class UsersService {
       if (userId === undefined)
         return { status: false, data: undefined, err: 'userId is undefined' };
 
-      return { status: true, data: { userId } };
+      return { status: true, data: { userId, ...decoded } };
     } catch (err) {
       return { status: false, data: undefined, err };
     }

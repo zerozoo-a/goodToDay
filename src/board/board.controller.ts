@@ -56,15 +56,15 @@ export class BoardController {
     @Body() body,
     @Res() res,
   ): Promise<Result> {
-    const isUserTokenValid = await this.usersService.validateHouseToken(
+    const parsedUserToken = await this.usersService.validateHouseToken(
       authorization.split(' ')[1],
     );
     /** 인증 실패 */
-    if (!isUserTokenValid.status) {
+    if (!parsedUserToken.status) {
       return res.json({
         success: false,
         data: { redirect: '/dashboard' },
-        err: isUserTokenValid.err,
+        err: parsedUserToken.err,
       });
     }
 
@@ -72,7 +72,7 @@ export class BoardController {
     const result = await this.boardService.postArticle({
       title: body.title,
       context: body.context,
-      userId: isUserTokenValid.data.userId,
+      userId: parsedUserToken.data.userId,
     });
 
     res.json({ success: true, data: { ...result, redirect: '/dashboard' } });

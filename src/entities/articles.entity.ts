@@ -1,5 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Users } from './users.entity';
+import { Comments } from './comments.entity';
 
 @Entity('articles', { schema: 'articles' })
 export class Articles {
@@ -28,4 +35,7 @@ export class Articles {
 
   @ManyToOne(() => Users, (user) => user.articles)
   user: Users;
+
+  @OneToMany(() => Comments, (comments) => comments.article)
+  comments: Comments;
 }

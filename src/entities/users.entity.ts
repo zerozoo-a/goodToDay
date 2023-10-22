@@ -6,7 +6,8 @@ import {
   Index,
 } from 'typeorm';
 import { UserAuthority } from './userAuthority.entity';
-import { Articles } from './board.entity';
+import { Articles } from './articles.entity';
+import { Comments } from './comments.entity';
 
 @Entity('users')
 export class Users {
@@ -74,4 +75,7 @@ export class Users {
 
   @OneToMany(() => Articles, (articles) => articles.user)
   articles;
+
+  @OneToMany(() => Comments, (comments) => comments.user)
+  comments;
 }

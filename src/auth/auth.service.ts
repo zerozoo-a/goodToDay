@@ -224,7 +224,7 @@ export class AuthService {
         <Result<ErrorDto>>{
           success: false,
           data: undefined,
-          err: [{ path: ['name'], message: 'name이 이미 등록되어 있습니다.' }],
+          err: [{ path: ['name'], message: '사용 할 수 없는 값입니다.' }],
         },
         409,
       );

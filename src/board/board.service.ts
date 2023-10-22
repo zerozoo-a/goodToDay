@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Articles } from 'src/entities/board.entity';
+import { Articles } from 'src/entities/articles.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -21,9 +21,11 @@ export class BoardService {
 
       const data = await this.articlesRepository.query(
         `
-        SELECT id, title, created_at, modified_at, userId,
+        SELECT articles.id, title, articles.created_at, articles.modified_at, userId, users.name,
         (SELECT COUNT(*) FROM boarder.articles) AS total_articles
         FROM boarder.articles
+        LEFT JOIN users
+        ON articles.userId = users.id
         ORDER BY created_at DESC
         LIMIT ?
         OFFSET ?;
@@ -41,7 +43,7 @@ export class BoardService {
     try {
       const data = await this.articlesRepository.query(
         `
-      SELECT articles.id, title, context, articles.created_at, articles.modified_at, name, users.id as userId
+      SELECT articles.id, title, context, articles.created_at, articles.modified_at, name, users.id as userId, users.name as userName
       FROM articles
       LEFT JOIN users
       ON articles.userId = users.id
@@ -63,7 +65,7 @@ export class BoardService {
   }: {
     title: string;
     context: string;
-    userId: any;
+    userId: number;
   }): Promise<Result> {
     try {
       const response = await this.articlesRepository.query(
